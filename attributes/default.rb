@@ -1,5 +1,5 @@
 #
-# Cookbook Name:: hadoop
+# Cookbook:: hadoop
 # Attribute:: default
 #
 # Copyright © 2013-2016 Cask Data, Inc.
@@ -45,8 +45,10 @@ default['flume']['conf_dir'] = node['hadoop']['conf_dir']
 default['hadoop_kms']['conf_dir'] = node['hadoop']['conf_dir']
 default['hbase']['conf_dir'] = node['hadoop']['conf_dir']
 default['hive']['conf_dir'] = node['hadoop']['conf_dir']
+default['hive2']['conf_dir'] = node['hadoop']['conf_dir']
 default['oozie']['conf_dir'] = node['hadoop']['conf_dir']
 default['spark']['conf_dir'] = node['hadoop']['conf_dir']
+default['spark2']['conf_dir'] = node['hadoop']['conf_dir']
 default['storm']['conf_dir'] = node['hadoop']['conf_dir']
 default['tez']['conf_dir'] = node['hadoop']['conf_dir']
 default['zookeeper']['conf_dir'] = node['hadoop']['conf_dir']
@@ -97,48 +99,6 @@ else
 end
 
 # MapReduce settings
-full_version =
-  case node['hadoop']['distribution_version']
-  when '2.2.0.0'
-    '2.2.0.0-2041'
-  when '2.2.1.0'
-    '2.2.1.0-2340'
-  when '2.2.4.2'
-    '2.2.4.2-2'
-  when '2.2.4.4'
-    '2.2.4.4-16'
-  when '2.2.6.0'
-    '2.2.6.0-2800'
-  when '2.2.6.3'
-    '2.2.6.3-1'
-  when '2.2.8.0'
-    '2.2.8.0-3150'
-  when '2.2.9.0'
-    '2.2.9.0-3393'
-  when '2.3.0.0'
-    '2.3.0.0-2557'
-  when '2.3.2.0'
-    '2.3.2.0-2950'
-  when '2.3.4.0'
-    '2.3.4.0-3485'
-  when '2.3.4.7'
-    '2.3.4.7-4'
-  when '2.3.6.0'
-    '2.3.6.0-3796'
-  when '2.4.0.0'
-    '2.4.0.0-169'
-  when '2.4.2.0'
-    '2.4.2.0-258'
-  when '2.4.3.0'
-    '2.4.3.0-227'
-  when '2.5.0.0'
-    '2.5.0.0-1245'
-  when '2.5.3.0'
-    '2.5.3.0-37'
-  else
-    node['hadoop']['distribution_version']
-  end
-
 default['hadoop']['hadoop_env']['hadoop_opts'] = '-Djava.net.preferIPv4Stack=true ${HADOOP_OPTS}'
 default['hadoop']['mapred_env']['hadoop_opts'] = '-Djava.net.preferIPv4Stack=true ${HADOOP_OPTS}'
 
@@ -150,8 +110,9 @@ if node['hadoop']['distribution'] == 'iop' ||
 
   distro = node['hadoop']['distribution']
   lzo_jar = distro == 'hdp' ? 'hadoop-lzo-0.6.0.${hdp.version}.jar' : 'hadoop-lzo-0.5.1.jar'
-  default['hadoop']['hadoop_env']['hadoop_opts'] += " -D#{distro}.version=#{full_version}"
-  default['hadoop']['mapred_env']['hadoop_opts'] += " -D#{distro}.version=#{full_version}"
+  # %{_FULL_VERSION} will be interpolated in the default recipe, when helper libraries are available
+  default['hadoop']['hadoop_env']['hadoop_opts'] += " -D#{distro}.version=%<_FULL_VERSION>s"
+  default['hadoop']['mapred_env']['hadoop_opts'] += " -D#{distro}.version=%<_FULL_VERSION>s"
   default['hadoop']['mapred_site']['mapreduce.admin.map.child.java.opts'] =
     "-server -Djava.net.preferIPv4Stack=true -D#{distro}.version=${#{distro}.version}"
   default['hadoop']['mapred_site']['mapreduce.admin.user.env'] =

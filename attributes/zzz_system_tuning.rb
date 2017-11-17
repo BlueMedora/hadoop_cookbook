@@ -1,5 +1,5 @@
 #
-# Cookbook Name:: hadoop
+# Cookbook:: hadoop
 # Attribute:: zzz_system_tuning
 #
 # Copyright © 2013-2015 Cask Data, Inc.
@@ -162,10 +162,9 @@ end
 ###
 
 ports = ports.uniq.sort.to_s.tr(' ', '').tr('[', '').tr(']', '') # De-dupe, Sort, and Stringify
-include_attribute 'sysctl'
 
 # net.ipv4.ip_local_reserved_ports setting (COOK-79)
-if node['sysctl']['params'].key?('net') && node['sysctl']['params']['net'].key?('ipv4') &&
+if node.key?('sysctl') && node['sysctl'].key?('params') && node['sysctl']['params'].key?('net') && node['sysctl']['params']['net'].key?('ipv4') &&
    node['sysctl']['params']['net']['ipv4'].key?('ip_local_reserved_ports')
   orig = node['sysctl']['params']['net']['ipv4']['ip_local_reserved_ports']
   default['sysctl']['params']['net']['ipv4']['ip_local_reserved_ports'] = "#{orig},#{ports}"

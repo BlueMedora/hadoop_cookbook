@@ -1,8 +1,8 @@
 #
-# Cookbook Name:: hadoop
+# Cookbook:: hadoop
 # Recipe:: _compression_libs
 #
-# Copyright © 2013-2016 Cask Data, Inc.
+# Copyright © 2013-2017 Cask Data, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -24,8 +24,13 @@ pkgs = []
 # Everybody gets snappy
 case node['platform_family']
 when 'debian'
-  pkgs += ['libsnappy1', 'libsnappy-dev']
-when 'rhel'
+  # HDP-UTILS repo provides its own libsnappy1, which conflicts with Ubuntu's libsnappy1v5
+  pkgs += if node['platform_version'].to_i >= 16 && node['hadoop']['distribution'] != 'hdp'
+            ['libsnappy1v5', 'libsnappy-dev']
+          else
+            ['libsnappy1', 'libsnappy-dev']
+          end
+when 'rhel', 'amazon'
   pkgs += ['snappy', 'snappy-devel']
 end
 
@@ -34,7 +39,7 @@ if hdp22?
   case node['platform_family']
   when 'debian'
     pkgs += ['liblzo2-2', 'liblzo2-dev', 'hadooplzo']
-  when 'rhel'
+  when 'rhel', 'amazon'
     pkgs += ['lzo', 'lzo-devel', 'hadooplzo', 'hadooplzo-native']
   end
 elsif iop?
